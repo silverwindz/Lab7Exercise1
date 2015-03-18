@@ -35,15 +35,36 @@ public class MainActivity extends ActionBarActivity {
         WeatherTask w = new WeatherTask();
         w.execute("http://ict.siit.tu.ac.th/~cholwich/bangkok.json", "Bangkok Weather");
     }
-
+    long prev = 0;
+    long prev2 = 0;
+    long prev3 = 0;
     public void buttonClicked(View v) {
-        int id = v.getId();
-        WeatherTask w = new WeatherTask();
-        switch (id) {
-            case R.id.btBangkok:
-                w.execute("http://ict.siit.tu.ac.th/~cholwich/bangkok.json", "Bangkok Weather");
-                break;
-        }
+        long reclick = System.currentTimeMillis();
+            int id = v.getId();
+            WeatherTask w = new WeatherTask();
+            switch (id) {
+                case R.id.btBangkok:
+                    if(reclick - prev > 60000) {
+                        w.execute("http://ict.siit.tu.ac.th/~cholwich/bangkok.json", "Bangkok Weather");
+                        prev = reclick;
+                    }
+                    break;
+
+                case R.id.btNon:
+                    if(reclick - prev2 > 60000) {
+                        w.execute("http://ict.siit.tu.ac.th/~cholwich/nonthaburi.json", "Nonthaburi Weather");
+                        prev2 = reclick;
+                    }
+                    break;
+                case R.id.btPathum:
+                    if(reclick - prev3 > 60000) {
+                    w.execute("http://ict.siit.tu.ac.th/~cholwich/pathumthani.json", "Pathum Weather");
+                        prev3 = reclick;
+                    }
+                    break;
+            }
+
+
     }
 
     @Override
@@ -74,6 +95,10 @@ public class MainActivity extends ActionBarActivity {
         String title;
 
         double windSpeed;
+        double temperature;
+        double temp_max;
+        double temp_min;
+        double humidity;
 
         @Override
         protected void onPreExecute() {
@@ -103,6 +128,22 @@ public class MainActivity extends ActionBarActivity {
                     }
                     //Start parsing JSON
                     JSONObject jWeather = new JSONObject(buffer.toString());
+                    JSONObject jTemp = jWeather.getJSONObject("main");
+                    temperature = jTemp.getDouble("temp");
+                    temperature = temperature - 273;
+
+                    JSONObject jTempMax = jWeather.getJSONObject("main");
+                    temp_max= jTempMax.getDouble("temp_max");
+                    temp_max = temp_max - 273;
+
+                    JSONObject jTempMin = jWeather.getJSONObject("main");
+                    temp_min = jTempMin.getDouble("temp_min");
+                    temp_min = temp_min - 273;
+
+                    JSONObject jHumid = jWeather.getJSONObject("main");
+                    humidity = jHumid.getDouble("humidity");
+
+
                     JSONObject jWind = jWeather.getJSONObject("wind");
                     windSpeed = jWind.getDouble("speed");
                     errorMsg = "";
@@ -126,7 +167,7 @@ public class MainActivity extends ActionBarActivity {
 
         @Override
         protected void onPostExecute(Boolean result) {
-            TextView tvTitle, tvWeather, tvWind;
+            TextView tvTitle, tvWeather, tvWind, tvHumid, tvTemp;
             if (pDialog.isShowing()) {
                 pDialog.dismiss();
             }
@@ -134,14 +175,20 @@ public class MainActivity extends ActionBarActivity {
             tvTitle = (TextView)findViewById(R.id.tvTitle);
             tvWeather = (TextView)findViewById(R.id.tvWeather);
             tvWind = (TextView)findViewById(R.id.tvWind);
+            tvHumid = (TextView)findViewById(R.id.tvHumid);
+            tvTemp = (TextView)findViewById(R.id.tvTemp);
 
             if (result) {
                 tvTitle.setText(title);
+                tvTemp.setText(String.format("%.1f(max = %.1f, min = %.1f)", temperature, temp_max, temp_max));
+                tvHumid.setText(String.format("%.0f", humidity) + "%");
                 tvWind.setText(String.format("%.1f", windSpeed));
             }
             else {
                 tvTitle.setText(errorMsg);
                 tvWeather.setText("");
+                tvTemp.setText("");
+                tvHumid.setText("");
                 tvWind.setText("");
             }
         }
