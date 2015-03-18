@@ -47,6 +47,8 @@ public class MainActivity extends ActionBarActivity {
                     if(reclick - prev > 60000) {
                         w.execute("http://ict.siit.tu.ac.th/~cholwich/bangkok.json", "Bangkok Weather");
                         prev = reclick;
+                        prev2 = 0;
+                        prev3 = 0;
                     }
                     break;
 
@@ -54,12 +56,16 @@ public class MainActivity extends ActionBarActivity {
                     if(reclick - prev2 > 60000) {
                         w.execute("http://ict.siit.tu.ac.th/~cholwich/nonthaburi.json", "Nonthaburi Weather");
                         prev2 = reclick;
+                        prev = 0;
+                        prev3 = 0;
                     }
                     break;
                 case R.id.btPathum:
                     if(reclick - prev3 > 60000) {
                     w.execute("http://ict.siit.tu.ac.th/~cholwich/pathumthani.json", "Pathum Weather");
                         prev3 = reclick;
+                        prev = 0;
+                        prev2 = 0;
                     }
                     break;
             }
